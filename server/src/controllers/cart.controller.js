@@ -1,4 +1,5 @@
 import Cart from "../models/cart.model.js";
+import { SuccessResponse } from "../models/response.model.js";
 
 export const getCart = async (req, res) => {
     const user = req.user;
@@ -14,21 +15,11 @@ export const getCart = async (req, res) => {
             await cart.populate("books.bookID");
         }
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: {
-                cart: cart,
-            },
-            message: "",
-        });
+        res.status(200).send(new SuccessResponse(200, "Ok", "", { cart }));
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -46,7 +37,6 @@ export const addBookToCart = async (req, res) => {
     }
 
     if (!quantity) {
-        console.log(quantity);
         return res.status(400).send({
             status: 400,
             statusText: "Bad Request",
@@ -77,21 +67,15 @@ export const addBookToCart = async (req, res) => {
 
         await cart.save();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: {
-                cart: cart,
-            },
-            message: "The book was added to your cart",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "The book was added to your cart", {
+                cart,
+            })
+        );
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -140,19 +124,15 @@ export const updateQuantity = async (req, res) => {
 
         await cart.save();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: { cart: cart },
-            message: "Your cart has been updated",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "Your cart has been updated", {
+                cart,
+            })
+        );
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -192,18 +172,15 @@ export const removeFromCart = async (req, res) => {
 
         await cart.save();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: { cart: cart },
-            message: "The item deleted successfully!",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "The item deleted successfully", {
+                cart,
+            })
+        );
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -228,17 +205,12 @@ export const checkout = async (req, res) => {
         cart.books = [];
         await cart.save();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: { cart: cart },
-            message: "Checkout successful",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "Checkout successfully", { cart })
+        );
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };

@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Cart from "../models/cart.model.js";
+import { SuccessResponse } from "../models/response.model.js";
 
 export const createUser = async (req, res) => {
     const userData = req.body;
@@ -14,49 +15,44 @@ export const createUser = async (req, res) => {
 
         const token = await user.generateAuthToken();
 
-        res.status(201).send({
-            status: 201,
-            statusText: "Created",
-            data: { user: user, token: token },
-            message: "User account was created successfully!",
-        });
+        res.status(201).send(
+            new SuccessResponse(
+                201,
+                "Created",
+                "User account was created successfully!",
+                { user, token }
+            )
+        );
     } catch (error) {
-        res.status(400).send({
-            status: 400,
-            statusText: "Bad request",
-            message: "",
-        });
+        error.status = 400;
+        error.statusText = "Bad request";
+        next(error);
     }
 };
 
-export const login = async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+export const login = async (req, res, next) => {
+    const { email, password } = req.body;
 
     try {
         if (!email || !password) {
-            throw new Error();
+            throw new Error("Unable to login");
         }
 
         const user = await User.findUserByEmailAndPassword(email, password);
+        if (!user) throw new Error();
 
         const token = await user.generateAuthToken();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: {
-                user: user,
-                token: token,
-            },
-            message: "User login successfully!",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "User login successfully!", {
+                user,
+                token,
+            })
+        );
     } catch (error) {
-        res.status(400).send({
-            status: 400,
-            statusText: "Bad request",
-            message: "",
-        });
+        error.status = 400;
+        error.statusText = "Bad request";
+        next(error);
     }
 };
 
@@ -70,17 +66,12 @@ export const logout = async (req, res) => {
         );
         await user.save();
 
-        res.status(200).send({
-            status: 200,
-            statusText: "Ok",
-            data: {},
-            message: "User logout successfully",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "User logout successfully")
+        );
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };

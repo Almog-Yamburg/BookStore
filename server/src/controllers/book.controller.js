@@ -1,21 +1,15 @@
 import Book from "../models/book.model.js";
+import { SuccessResponse } from "../models/response.model.js";
 
 export const getBooks = async (req, res) => {
     try {
         const books = await Book.find();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: { books: books },
-            message: "",
-        });
+        res.status(200).send(new SuccessResponse(200, "Ok", "", { books }));
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -33,18 +27,11 @@ export const getBook = async (req, res) => {
         const book = await Book.findById(bookID);
         if (!book) throw new Error();
 
-        res.send({
-            status: 200,
-            statusText: "Ok",
-            data: { book: book },
-            message: "",
-        });
+        res.status(200).send(new SuccessResponse(200, "Ok", "", { book }));
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -55,18 +42,18 @@ export const createBook = async (req, res) => {
     try {
         await book.save();
 
-        res.status(201).send({
-            status: 201,
-            statusText: "Created",
-            data: { book: book },
-            message: "Book was created successfully",
-        });
+        res.status(201).send(
+            new SuccessResponse(
+                201,
+                "Created",
+                "Book was created Successfully",
+                { book }
+            )
+        );
     } catch (error) {
-        res.status(400).send({
-            status: 400,
-            statusText: "bad Request",
-            message: "",
-        });
+        error.status = 400;
+        error.statusText = "Bad request";
+        next(error);
     }
 };
 
@@ -89,18 +76,18 @@ export const updateBook = async (req, res) => {
         const updatedBook = await Book.findById(bookID);
         if (!updatedBook) throw new Error();
 
-        res.status(202).send({
-            status: 202,
-            statusText: "Accepted",
-            data: { updateBook: updatedBook },
-            message: "Book was updated successfully",
-        });
+        res.status(202).send(
+            new SuccessResponse(
+                202,
+                "Accepted",
+                "Book was updated successfully",
+                { updateBook }
+            )
+        );
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };
 
@@ -110,17 +97,12 @@ export const deleteBook = async (req, res) => {
     try {
         await Book.findByIdAndDelete(bookID);
 
-        res.status(200).send({
-            status: 200,
-            statusText: "Ok",
-            data: {},
-            message: "Book was deleted successfully",
-        });
+        res.status(200).send(
+            new SuccessResponse(200, "Ok", "Book was deleted successfully")
+        );
     } catch (error) {
-        res.status(500).send({
-            status: 500,
-            statusText: "Internal Server Error",
-            message: "",
-        });
+        error.status = 500;
+        error.statusText = "Internal Server Error";
+        next(error);
     }
 };

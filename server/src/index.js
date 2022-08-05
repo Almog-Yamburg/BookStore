@@ -11,6 +11,8 @@ import cartRouter from "./routers/cart.router.js";
 import bookRouter from "./routers/book.router.js";
 import adminRouter from "./routers/admin.router.js";
 
+import errorHandler from "./middlewares/error.handler.middleware.js";
+
 dotenv.config();
 const PORT = environments.PORT;
 
@@ -23,6 +25,8 @@ app.use(userRouter);
 app.use(cartRouter);
 app.use(bookRouter);
 app.use(adminRouter);
+
+app.use(errorHandler);
 
 app.listen(PORT, async () => {
     console.log(`Server is running on PORT: ${PORT}`);
