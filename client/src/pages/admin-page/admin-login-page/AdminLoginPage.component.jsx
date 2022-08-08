@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./admin-login-page.styles.css";
 
 import { AuthContext } from "../../../contexts/Auth.context";
+import { LOADER_TIMEOUT } from "../../../constants/constants";
 
 import Card from "../../../components/card/Card.component";
 import Loader from "../../../components/shared/loader/Loader.component";
@@ -26,7 +27,7 @@ const AdminLoginPage = () => {
 
         setTimeout(() => {
             setIsLoading(false);
-        }, 2000);
+        }, LOADER_TIMEOUT);
     }, []);
 
     return isLoading ? (

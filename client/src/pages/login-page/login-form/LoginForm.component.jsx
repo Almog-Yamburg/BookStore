@@ -6,14 +6,13 @@ import isEmail from "validator/lib/isEmail";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import { AuthContext } from "../../../contexts/Auth.context";
+import { LoginFormData } from "../../../models/login-form.model";
+import { login } from "../../../services/user.service";
 
 import loginReducer, {
     LOGIN_FORM_INITIAL_STATE,
 } from "../../../reducers/login-form.reducer";
-import {
-    updateEmailAction,
-    updatedPasswordAction,
-} from "../../../actions/login-form.actions";
+import { updateAction } from "../../../actions/login-form.actions";
 
 import {
     initialTokenAction,
@@ -38,10 +37,11 @@ const LoginForm = () => {
 
         if (emailInput === "") {
             dispatchLoginFormState(
-                updateEmailAction(
+                updateAction(
                     emailInput,
                     false,
-                    "Please enter an email address"
+                    "Please enter an email address",
+                    "email"
                 )
             );
 
@@ -50,17 +50,18 @@ const LoginForm = () => {
 
         if (!isEmail(emailInput)) {
             dispatchLoginFormState(
-                updateEmailAction(
+                updateAction(
                     emailInput,
                     false,
-                    "Please enter a valid email address"
+                    "Please enter a valid email address",
+                    "email"
                 )
             );
 
             return;
         }
 
-        dispatchLoginFormState(updateEmailAction(emailInput, true, ""));
+        dispatchLoginFormState(updateAction(emailInput, true, "", "email"));
     };
 
     const handlePasswordInput = (event) => {
@@ -68,10 +69,11 @@ const LoginForm = () => {
 
         if (passwordInput === "") {
             dispatchLoginFormState(
-                updatedPasswordAction(
+                updateAction(
                     passwordInput,
                     false,
-                    "Please enter a password"
+                    "Please enter a password",
+                    "password"
                 )
             );
 
@@ -80,15 +82,18 @@ const LoginForm = () => {
 
         if (!isStrongPassword(passwordInput)) {
             dispatchLoginFormState(
-                updatedPasswordAction(
+                updateAction(
                     passwordInput,
                     false,
-                    "You must enter a password with at least 8 characters which includes one capital letter, number and special character"
+                    "You must enter a password with at least 8 characters which includes one capital letter, number and special character",
+                    "password"
                 )
             );
         }
 
-        dispatchLoginFormState(updatedPasswordAction(passwordInput, true, ""));
+        dispatchLoginFormState(
+            updateAction(passwordInput, true, "", "password")
+        );
     };
 
     const handleSubmit = async (event) => {
@@ -106,29 +111,13 @@ const LoginForm = () => {
             return;
         }
 
-        const loginFormValues = loginFormState.values;
-        const data = {
-            email: loginFormValues.email,
-            password: loginFormValues.password,
-        };
+        const { email, password } = loginFormState.values;
+
+        const data = new LoginFormData(email, password);
 
         try {
-            const response = await fetch("http://localhost:3000/users/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
-
-            // response.ok is equal to true/false if the response returned status 200
-            /// response.ok = response.status === 200
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            const responseData = await response.json();
-            const token = responseData.data.token;
+            const response = await login(data);
+            const { token } = response.data;
 
             localStorage.setItem("USER", token);
             authContextValue.dispatchAssignAccessState(

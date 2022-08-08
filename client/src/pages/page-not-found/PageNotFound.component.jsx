@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./page-not-found.styles.css";
 
 import Loader from "../../components/shared/loader/Loader.component";
+import { LOADER_TIMEOUT } from "../../constants/constants.js";
 
 const PageNotFound = () => {
     const navigate = useNavigate();
@@ -12,7 +13,7 @@ const PageNotFound = () => {
     useEffect(() => {
         setTimeout(() => {
             setIsLoading(false);
-        }, 2000);
+        }, LOADER_TIMEOUT);
     }, []);
 
     const handleClick = () => navigate("/");

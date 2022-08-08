@@ -7,6 +7,7 @@ import { AuthContext } from "../../../contexts/Auth.context";
 import Card from "../../../components/card/Card.component";
 import Loader from "../../../components/shared/loader/Loader.component";
 import AdminSignupForm from "./admin-signup-form/AdminSignupForm.component";
+import { LOADER_TIMEOUT } from "../../../constants/constants";
 
 const AdminSignupPage = () => {
     const navigate = useNavigate();
@@ -22,7 +23,7 @@ const AdminSignupPage = () => {
 
         setTimeout(() => {
             setIsLoading(false);
-        }, 2000);
+        }, LOADER_TIMEOUT);
     }, []);
 
     return isLoading ? (

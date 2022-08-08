@@ -4,6 +4,8 @@ import "./home-page.styles.css";
 
 import Loader from "../../components/shared/loader/Loader.component";
 import Book from "../../components/book/Book.component";
+import { getAllBooks } from "../../services/book.service";
+import { LOADER_TIMEOUT } from "../../constants/constants";
 
 const HomePage = () => {
     const navigate = useNavigate();
@@ -14,20 +16,14 @@ const HomePage = () => {
     useEffect(() => {
         const getBooks = async () => {
             try {
-                const response = await fetch("http://localhost:3000/books");
-
-                if (!response) {
-                    throw new Error();
-                }
-
-                const responseObj = await response.json();
-                const books = responseObj.data.books;
+                const response = await getAllBooks();
+                const { books } = response.data;
 
                 setBooks(books);
 
                 setTimeout(() => {
                     setIsLoading(false);
-                }, 2000);
+                }, LOADER_TIMEOUT);
             } catch (error) {
                 navigate("*");
             }

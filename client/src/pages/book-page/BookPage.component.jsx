@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./book-page.styles.css";
 
 import { AuthContext } from "../../contexts/Auth.context";
+import { getOneBook } from "../../services/book.service";
+import { LOADER_TIMEOUT } from "../../constants/constants";
+import { addToCart } from "../../services/cart.service";
 
 import Loader from "../../components/shared/loader/Loader.component";
 import { BookPageData } from "../../models/book-page.model";
@@ -34,24 +37,8 @@ const BookPage = () => {
         const data = new BookPageData(params.bookID, quantity);
 
         try {
-            const response = await fetch(
-                "http://localhost:3000/cart/add-to-cart",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: authContextValue.assignAccessState.token,
-                    },
-                    body: JSON.stringify(data),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
+            const response = await addToCart(data, authContextValue);
+            const message = response.message;
 
             alert(message);
         } catch (error) {
@@ -64,22 +51,14 @@ const BookPage = () => {
 
         const getBook = async () => {
             try {
-                const response = await fetch(
-                    `http://localhost:3000/books/${bookID}`
-                );
-
-                if (!response.ok) {
-                    throw new Error();
-                }
-
-                const responseObj = await response.json();
-                const book = responseObj.data.book;
+                const response = await getOneBook(bookID);
+                const { book } = response.data;
 
                 setBook(book);
 
                 setTimeout(() => {
                     setIsLoading(false);
-                }, 2000);
+                }, LOADER_TIMEOUT);
             } catch (error) {
                 navigate("*");
             }

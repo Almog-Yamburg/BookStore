@@ -6,14 +6,13 @@ import isEmail from "validator/lib/isEmail";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import { AuthContext } from "../../../../contexts/Auth.context";
+import { adminLogin } from "../../../../services/admin.service";
+import { LoginFormData } from "../../../../models/login-form.model";
 
 import loginReducer, {
     LOGIN_FORM_INITIAL_STATE,
 } from "../../../../reducers/login-form.reducer.js";
-import {
-    updateEmailAction,
-    updatedPasswordAction,
-} from "../../../../actions/login-form.actions.js";
+import { updateAction } from "../../../../actions/login-form.actions.js";
 
 import {
     initialTokenAction,
@@ -37,10 +36,11 @@ const AdminLoginForm = () => {
 
         if (emailInput === "") {
             dispatchLoginFormState(
-                updateEmailAction(
+                updateAction(
                     emailInput,
                     false,
-                    "Please enter an email address"
+                    "Please enter an email address",
+                    "email"
                 )
             );
 
@@ -49,17 +49,18 @@ const AdminLoginForm = () => {
 
         if (!isEmail(emailInput)) {
             dispatchLoginFormState(
-                updateEmailAction(
+                updateAction(
                     emailInput,
                     false,
-                    "Please enter a valid email address"
+                    "Please enter a valid email address",
+                    "email"
                 )
             );
 
             return;
         }
 
-        dispatchLoginFormState(updateEmailAction(emailInput, true, ""));
+        dispatchLoginFormState(updateAction(emailInput, true, "", "email"));
     };
 
     const handlePasswordInput = (event) => {
@@ -67,10 +68,11 @@ const AdminLoginForm = () => {
 
         if (passwordInput === "") {
             dispatchLoginFormState(
-                updatedPasswordAction(
+                updateAction(
                     passwordInput,
                     false,
-                    "Please enter a password"
+                    "Please enter a password",
+                    "password"
                 )
             );
 
@@ -79,15 +81,18 @@ const AdminLoginForm = () => {
 
         if (!isStrongPassword(passwordInput)) {
             dispatchLoginFormState(
-                updatedPasswordAction(
+                updateAction(
                     passwordInput,
                     false,
-                    "You must enter a password with at least 8 characters which includes one capital letter, number and special character"
+                    "You must enter a password with at least 8 characters which includes one capital letter, number and special character",
+                    "password"
                 )
             );
         }
 
-        dispatchLoginFormState(updatedPasswordAction(passwordInput, true, ""));
+        dispatchLoginFormState(
+            updateAction(passwordInput, true, "", "password")
+        );
     };
 
     const handleSubmit = async (event) => {
@@ -105,27 +110,13 @@ const AdminLoginForm = () => {
             return;
         }
 
-        const loginFormValues = loginFormState.values;
-        const data = {
-            email: loginFormValues.email,
-            password: loginFormValues.password,
-        };
+        const { email, password } = loginFormState.values;
+
+        const data = new LoginFormData(email, password);
 
         try {
-            const response = await fetch("http://localhost:3000/admins/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            const responseData = await response.json();
-            const token = responseData.data.token;
+            const response = await adminLogin(data);
+            const { token } = response.data;
 
             localStorage.setItem("ADMIN", token);
             authContextValue.dispatchAssignAccessState(

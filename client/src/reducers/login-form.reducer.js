@@ -17,45 +17,20 @@ export const LOGIN_FORM_INITIAL_STATE = {
 
 const loginReducer = (state, action) => {
     switch (action.type) {
-        case loginFormActionTypes.UPDATE_EMAIL: {
-            const updatedEmailValue = action.payload.value;
-            const updatedIsEmailValid = action.payload.isValid;
-            const updatedEmailErrorMessage = action.payload.errorMessage;
-
-            const updatedValues = { ...state.values, email: updatedEmailValue };
-            const updatedValidities = {
-                ...state.validities,
-                email: updatedIsEmailValid,
-            };
-            const updatedErrorMessages = {
-                ...state.errorMessages,
-                email: updatedEmailErrorMessage,
-            };
-
-            const updatedState = {
-                values: updatedValues,
-                validities: updatedValidities,
-                errorMessages: updatedErrorMessages,
-            };
-
-            return updatedState;
-        }
-        case loginFormActionTypes.UPDATE_PASSWORD: {
-            const updatedPasswordValue = action.payload.value;
-            const updatedIsPasswordValid = action.payload.isValid;
-            const updatedPasswordErrorMessage = action.payload.errorMessage;
+        case loginFormActionTypes.UPDATE_FORM_FIELD: {
+            const { field } = action.payload;
 
             const updatedValues = {
                 ...state.values,
-                password: updatedPasswordValue,
+                [field]: action.payload.value,
             };
             const updatedValidities = {
                 ...state.validities,
-                password: updatedIsPasswordValid,
+                [field]: action.payload.isValid,
             };
             const updatedErrorMessages = {
                 ...state.errorMessages,
-                password: updatedPasswordErrorMessage,
+                [field]: action.payload.errorMessage,
             };
 
             const updatedState = {
@@ -66,9 +41,8 @@ const loginReducer = (state, action) => {
 
             return updatedState;
         }
-        default: {
+        default:
             return state;
-        }
     }
 };
 

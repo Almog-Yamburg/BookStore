@@ -6,6 +6,13 @@ import isEmail from "validator/lib/isEmail";
 import isStrongPassword from "validator/lib/isStrongPassword";
 
 import { AuthContext } from "../../../../contexts/Auth.context";
+import { SignupFormData } from "../../../../models/signup-form.model";
+import { adminSignup } from "../../../../services/admin.service";
+
+import {
+    initialTokenAction,
+    initialUserTypeAction,
+} from "../../../../actions/assign-access.action";
 
 import signupFormReducer, {
     SIGNUP_FORM_INITIAL_STATE,
@@ -29,10 +36,11 @@ const AdminSignupForm = () => {
 
         if (firstNameInput === "") {
             dispatchSignUpFormState(
-                signupFormActions.updateFirstName(
+                signupFormActions.updateAction(
                     firstNameInput,
                     false,
-                    "Please enter your first name"
+                    "Please enter your first name",
+                    "firstName"
                 )
             );
 
@@ -40,7 +48,12 @@ const AdminSignupForm = () => {
         }
 
         dispatchSignUpFormState(
-            signupFormActions.updateFirstName(firstNameInput, true, "")
+            signupFormActions.updateAction(
+                firstNameInput,
+                true,
+                "",
+                "firstName"
+            )
         );
     };
 
@@ -49,10 +62,11 @@ const AdminSignupForm = () => {
 
         if (lastNameInput === "") {
             dispatchSignUpFormState(
-                signupFormActions.updateLastName(
+                signupFormActions.updateAction(
                     lastNameInput,
                     false,
-                    "Please enter your last name"
+                    "Please enter your last name",
+                    "lastName"
                 )
             );
 
@@ -60,7 +74,7 @@ const AdminSignupForm = () => {
         }
 
         dispatchSignUpFormState(
-            signupFormActions.updateLastName(lastNameInput, true, "")
+            signupFormActions.updateAction(lastNameInput, true, "", "lastName")
         );
     };
 
@@ -69,10 +83,11 @@ const AdminSignupForm = () => {
 
         if (emailInput === "") {
             dispatchSignUpFormState(
-                signupFormActions.updateEmailAction(
+                signupFormActions.updateAction(
                     emailInput,
                     false,
-                    "Please enter an email address"
+                    "Please enter an email address",
+                    "email"
                 )
             );
 
@@ -81,10 +96,11 @@ const AdminSignupForm = () => {
 
         if (!isEmail(emailInput)) {
             dispatchSignUpFormState(
-                signupFormActions.updateEmailAction(
+                signupFormActions.updateAction(
                     emailInput,
                     false,
-                    "Please enter a valid email address"
+                    "Please enter a valid email address",
+                    "email"
                 )
             );
 
@@ -92,7 +108,7 @@ const AdminSignupForm = () => {
         }
 
         dispatchSignUpFormState(
-            signupFormActions.updateEmailAction(emailInput, true, "")
+            signupFormActions.updateAction(emailInput, true, "", "email")
         );
     };
 
@@ -101,10 +117,11 @@ const AdminSignupForm = () => {
 
         if (passwordInput === "") {
             dispatchSignUpFormState(
-                signupFormActions.updatedPasswordAction(
+                signupFormActions.updateAction(
                     passwordInput,
                     false,
-                    "Please enter a password"
+                    "Please enter a password",
+                    "password"
                 )
             );
 
@@ -113,10 +130,11 @@ const AdminSignupForm = () => {
 
         if (!isStrongPassword(passwordInput)) {
             dispatchSignUpFormState(
-                signupFormActions.updatedPasswordAction(
+                signupFormActions.updateAction(
                     passwordInput,
                     false,
-                    "You must enter a password with at least 8 characters which includes one capital letter, number and special character"
+                    "You must enter a password with at least 8 characters which includes one capital letter, number and special character",
+                    "password"
                 )
             );
 
@@ -124,7 +142,7 @@ const AdminSignupForm = () => {
         }
 
         dispatchSignUpFormState(
-            signupFormActions.updatedPasswordAction(passwordInput, true, "")
+            signupFormActions.updateAction(passwordInput, true, "", "password")
         );
     };
 
@@ -133,10 +151,11 @@ const AdminSignupForm = () => {
 
         if (repeatedPasswordInput === "") {
             dispatchSignUpFormState(
-                signupFormActions.updatedRepeatedPasswordAction(
+                signupFormActions.updateAction(
                     repeatedPasswordInput,
                     false,
-                    "Please enter your password again"
+                    "Please enter your password again",
+                    "repeatedPassword"
                 )
             );
 
@@ -145,10 +164,11 @@ const AdminSignupForm = () => {
 
         if (repeatedPasswordInput !== signupFormState.values.password) {
             dispatchSignUpFormState(
-                signupFormActions.updatedRepeatedPasswordAction(
+                signupFormActions.updateAction(
                     repeatedPasswordInput,
                     false,
-                    "Your passwords don't match"
+                    "Your passwords don't match",
+                    "repeatedPassword"
                 )
             );
 
@@ -156,10 +176,11 @@ const AdminSignupForm = () => {
         }
 
         dispatchSignUpFormState(
-            signupFormActions.updatedRepeatedPasswordAction(
+            signupFormActions.updateAction(
                 repeatedPasswordInput,
                 true,
-                ""
+                "",
+                "repeatedPassword"
             )
         );
     };
@@ -182,33 +203,21 @@ const AdminSignupForm = () => {
             return;
         }
 
-        const signupFormValues = signupFormState.values;
-        const data = {
-            firstName: signupFormValues.firstName,
-            lastName: signupFormValues.lastName,
-            email: signupFormValues.email,
-            password: signupFormValues.password,
-        };
+        const { firstName, lastName, email, password } = signupFormState.values;
+
+        const data = new SignupFormData(firstName, lastName, email, password);
 
         try {
-            const response = await fetch(
-                "http://localhost:3000/admins/signup",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(data),
-                }
+            const response = await adminSignup(data);
+            const { token } = response.data;
+
+            localStorage.setItem("ADMIN", token);
+            authContextValue.dispatchAssignAccessState(
+                initialTokenAction(token)
             );
-
-            if (response.status !== 201) throw new Error();
-
-            const responseData = await response.json();
-            const token = responseData.data.token;
-
-            localStorage.setItem("admin-token", token);
-            authContextValue.setUserToken(token);
+            authContextValue.dispatchAssignAccessState(
+                initialUserTypeAction("ADMIN")
+            );
 
             navigate("/admins/dashboard");
         } catch (error) {

@@ -11,8 +11,10 @@ import {
 
 import Loader from "../../components/shared/loader/Loader.component";
 import CartItems from "./cart-items/CartItems.component";
+import { getUserCart, checkout } from "../../services/cart.service";
+import { LOADER_TIMEOUT } from "../../constants/constants";
 
-const CartPage = (props) => {
+const CartPage = () => {
     const navigate = useNavigate();
 
     const authContextValue = useContext(AuthContext);
@@ -22,22 +24,8 @@ const CartPage = (props) => {
 
     const handleCheckout = async () => {
         try {
-            const response = await fetch(
-                "http://localhost:3000/cart/checkout",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: authContextValue.assignAccessState.token,
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
+            const response = await checkout(authContextValue);
+            const message = response.message;
             alert(message);
 
             cartContextValue.dispatchCart(checkoutCartAction());
@@ -49,24 +37,14 @@ const CartPage = (props) => {
     useEffect(() => {
         const getCart = async () => {
             try {
-                const response = await fetch("http://localhost:3000/cart", {
-                    headers: {
-                        Authorization: authContextValue.assignAccessState.token,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error();
-                }
-
-                const responseObj = await response.json();
-                const cart = responseObj.data.cart;
+                const response = await getUserCart(authContextValue);
+                const { cart } = response.data;
 
                 cartContextValue.dispatchCart(initialCartAction(cart.books));
 
                 setTimeout(() => {
                     setIsLoading(false);
-                }, 2000);
+                }, LOADER_TIMEOUT);
             } catch (error) {
                 navigate("*");
             }

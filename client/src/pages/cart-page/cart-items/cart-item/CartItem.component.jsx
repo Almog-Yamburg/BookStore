@@ -3,6 +3,11 @@ import "./cart-item.styles.css";
 
 import { AuthContext } from "../../../../contexts/Auth.context";
 import { CartContext } from "../../../../contexts/Cart.context";
+import { cartData } from "../../../../models/cart.model";
+import {
+    removeFromCart,
+    updateQuantity,
+} from "../../../../services/cart.service";
 
 import {
     updateCartAction,
@@ -10,29 +15,15 @@ import {
     decrement,
 } from "../../../../actions/cart.actions";
 
-import environments from "../../../../environments/environments.js";
-
 const CartItem = (props) => {
     const authContextValue = useContext(AuthContext);
     const cartContextValue = useContext(CartContext);
-    const API_URL = environments.API_URL;
 
     const handleRemoveFromCart = async () => {
-        const data = { bookID: props.id };
+        const data = cartData(props.id);
 
         try {
-            const response = await fetch(`${API_URL}/cart/remove-from-cart`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: authContextValue.assignAccessState.token,
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error();
-            }
+            await removeFromCart(data, authContextValue);
 
             cartContextValue.dispatchCart(
                 updateCartAction(props.id, props.price)
@@ -43,24 +34,10 @@ const CartItem = (props) => {
     };
 
     const handleIncrement = async () => {
-        const data = {
-            bookID: props.id,
-            quantity: props.quantity,
-        };
+        const data = new cartData(props.id, props.quantity);
 
         try {
-            const response = await fetch(`${API_URL}/cart/update`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: authContextValue.assignAccessState.token,
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error();
-            }
+            await updateQuantity(data, authContextValue);
 
             cartContextValue.dispatchCart(increment(props.id));
         } catch (error) {
@@ -69,24 +46,10 @@ const CartItem = (props) => {
     };
 
     const handleDecrement = async () => {
-        const data = {
-            bookID: props.id,
-            quantity: props.quantity,
-        };
+        const data = new cartData(props.id, props.quantity);
 
         try {
-            const response = await fetch(`${API_URL}/cart/update`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: authContextValue.assignAccessState.token,
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                throw new Error();
-            }
+            await updateQuantity(data, authContextValue);
 
             cartContextValue.dispatchCart(decrement(props.id));
         } catch (error) {

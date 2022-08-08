@@ -1,28 +1,15 @@
 const loginFormActionTypes = {
-    UPDATE_EMAIL: "UPDATE_EMAIL",
-    UPDATE_PASSWORD: "UPDATE_PASSWORD",
+    UPDATE_FORM_FIELD: "UPDATE_FORM_FIELD",
 };
 
-export const updateEmailAction = (value, isValid, errorMessage) => {
+export const updateAction = (value, isValid, message, field) => {
     const action = {
-        type: loginFormActionTypes.UPDATE_EMAIL,
+        type: loginFormActionTypes.UPDATE_FORM_FIELD,
         payload: {
-            value: value,
-            isValid: isValid,
-            errorMessage: errorMessage,
-        },
-    };
-
-    return action;
-};
-
-export const updatedPasswordAction = (value, isValid, errorMessage) => {
-    const action = {
-        type: loginFormActionTypes.UPDATE_PASSWORD,
-        payload: {
-            value: value,
-            isValid: isValid,
-            errorMessage: errorMessage,
+            value,
+            isValid,
+            message,
+            field,
         },
     };
 

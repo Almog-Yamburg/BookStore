@@ -2,20 +2,19 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./admin-page.styles.css";
 
-import environments from "../../environments/environments.js";
-
 import { initialBook } from "../../actions/book-action";
 
 import Loader from "../../components/shared/loader/Loader.component";
 import { AuthContext } from "../../contexts/Auth.context";
 import { BookContext } from "../../contexts/Book.context";
+import { getAllBooks } from "../../services/book.service";
+import { LOADER_TIMEOUT } from "../../constants/constants";
 import CreateBookModal from "../../components/create-book-modal/CreateBookModal.component";
 
 import Book from "../../components/book/Book.component";
 
 const AdminPage = () => {
     const navigate = useNavigate();
-    const API_URL = environments.API_URL;
 
     const authContextValue = useContext(AuthContext);
     const bookContextValue = useContext(BookContext);
@@ -74,20 +73,14 @@ const AdminPage = () => {
 
         const getBooks = async () => {
             try {
-                const response = await fetch("http://localhost:3000/books");
-
-                if (!response) {
-                    throw new Error();
-                }
-
-                const responseObj = await response.json();
-                const books = responseObj.data.books;
+                const response = await getAllBooks();
+                const { books } = response.data;
 
                 bookContextValue.dispatchBook(initialBook(books));
 
                 setTimeout(() => {
                     setIsLoading(false);
-                }, 2000);
+                }, LOADER_TIMEOUT);
             } catch (error) {
                 navigate("*");
             }

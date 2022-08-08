@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import Cart from "../models/cart.model.js";
 import { SuccessResponse } from "../models/response.model.js";
 
-export const createUser = async (req, res) => {
+export const createUser = async (req, res, next) => {
     const userData = req.body;
 
     const user = new User(userData);
@@ -56,7 +56,7 @@ export const login = async (req, res, next) => {
     }
 };
 
-export const logout = async (req, res) => {
+export const logout = async (req, res, next) => {
     const user = req.user;
     const token = req.token;
 
