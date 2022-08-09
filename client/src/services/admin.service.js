@@ -31,3 +31,18 @@ export const adminLogin = async (data) => {
 
     return responseObj;
 };
+
+export const adminLogout = async (authContextValue) => {
+    const response = await fetch(`${environments.API_URL}/admins/logout`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${authContextValue.assignAccessState.token}`,
+        },
+    });
+
+    if (!response.ok) throw new Error();
+
+    const responseObj = response.json();
+
+    return responseObj;
+};

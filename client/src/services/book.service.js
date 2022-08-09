@@ -19,3 +19,52 @@ export const getOneBook = async (bookID) => {
 
     return responseObj;
 };
+
+export const addNewBook = async (data, authContextValue) => {
+    const response = await fetch(`${environments.API_URL}/books/new`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: authContextValue.assignAccessState.token,
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.status !== 201) throw new Error();
+
+    const responseObj = response.json();
+
+    return responseObj;
+};
+
+export const updateBook = async (data, authContextValue, bookID) => {
+    const response = await fetch(`${environments.API_URL}/books/${bookID}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: authContextValue.assignAccessState.token,
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.status !== 202) throw new Error();
+
+    const responseObj = response.json();
+
+    return responseObj;
+};
+
+export const deleteBook = async (authContextValue, bookID) => {
+    const response = await fetch(`${environments.API_URL}/books/${bookID}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: authContextValue.assignAccessState.token,
+        },
+    });
+
+    if (!response.ok) throw new Error();
+
+    const responseObj = response.json();
+
+    return responseObj;
+};

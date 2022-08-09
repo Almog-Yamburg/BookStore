@@ -1,9 +1,14 @@
 import React, { useReducer, useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import "./book-modal-form.styles.css";
 
 import { AuthContext } from "../../../contexts/Auth.context";
 import { BookContext } from "../../../contexts/Book.context";
+import { BookModalData } from "../../../models/book-modal.model";
+import {
+    addNewBook,
+    updateBook,
+    deleteBook,
+} from "../../../services/book.service";
 
 import bookModalFormReducer, {
     BOOK_MODAL_FORM_INITIAL_STATE,
@@ -15,7 +20,6 @@ import * as BookActions from "../../../actions/book-action.js";
 import FormInputContainer from "../../form/form-input-container/FormInputContainer.component";
 
 const BookModalForm = (props) => {
-    const navigate = useNavigate();
     const bookID = props.id;
 
     const authContextValue = useContext(AuthContext);
@@ -31,10 +35,11 @@ const BookModalForm = (props) => {
 
         if (titleInput === "") {
             dispatchBookModalFormState(
-                BookModalFormActions.updateTitleName(
+                BookModalFormActions.updateAction(
                     titleInput,
                     false,
-                    "Please enter book title"
+                    "Please enter book title",
+                    "titleInput"
                 )
             );
 
@@ -42,7 +47,12 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updateTitleName(titleInput, true, "")
+            BookModalFormActions.updateAction(
+                titleInput,
+                true,
+                "",
+                "titleInput"
+            )
         );
     };
 
@@ -51,10 +61,11 @@ const BookModalForm = (props) => {
 
         if (authorInput === "") {
             dispatchBookModalFormState(
-                BookModalFormActions.updateAuthorName(
+                BookModalFormActions.updateAction(
                     authorInput,
                     false,
-                    "Please enter author name"
+                    "Please enter author name",
+                    "authorName"
                 )
             );
 
@@ -62,7 +73,12 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updateAuthorName(authorInput, true, "")
+            BookModalFormActions.updateAction(
+                authorInput,
+                true,
+                "",
+                "authorName"
+            )
         );
     };
 
@@ -71,10 +87,11 @@ const BookModalForm = (props) => {
 
         if (bookCoverInput === "") {
             dispatchBookModalFormState(
-                BookModalFormActions.updateBookCover(
+                BookModalFormActions.updateAction(
                     bookCoverInput,
                     false,
-                    "Please enter bookCover jpg"
+                    "Please enter bookCover jpg",
+                    "bookCover"
                 )
             );
 
@@ -82,7 +99,12 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updateBookCover(bookCoverInput, true, "")
+            BookModalFormActions.updateAction(
+                bookCoverInput,
+                true,
+                "",
+                "bookCover"
+            )
         );
     };
 
@@ -91,10 +113,11 @@ const BookModalForm = (props) => {
 
         if (descriptionInput === "") {
             dispatchBookModalFormState(
-                BookModalFormActions.updateDescription(
+                BookModalFormActions.updateAction(
                     descriptionInput,
                     false,
-                    "Please enter a book description"
+                    "Please enter a book description",
+                    "description"
                 )
             );
 
@@ -102,7 +125,12 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updateDescription(descriptionInput, true, "")
+            BookModalFormActions.updateAction(
+                descriptionInput,
+                true,
+                "",
+                "description"
+            )
         );
     };
 
@@ -111,10 +139,11 @@ const BookModalForm = (props) => {
 
         if (pagesInput === "") {
             dispatchBookModalFormState(
-                BookModalFormActions.updatePages(
+                BookModalFormActions.updateAction(
                     pagesInput,
                     false,
-                    "Please enter book pages amount"
+                    "Please enter book pages amount",
+                    "pages"
                 )
             );
 
@@ -122,7 +151,7 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updatePages(pagesInput, true, "")
+            BookModalFormActions.updateAction(pagesInput, true, "", "pages")
         );
     };
 
@@ -131,10 +160,11 @@ const BookModalForm = (props) => {
 
         if (priceInput === "") {
             dispatchBookModalFormState(
-                BookModalFormActions.updatePrice(
+                BookModalFormActions.updateAction(
                     priceInput,
                     false,
-                    "Please enter book price"
+                    "Please enter book price",
+                    "price"
                 )
             );
 
@@ -142,7 +172,7 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updatePrice(priceInput, true, "")
+            BookModalFormActions.updateAction(priceInput, true, "", "price")
         );
     };
 
@@ -166,34 +196,22 @@ const BookModalForm = (props) => {
             return;
         }
 
-        const bookModalFormValues = bookModalFormState.values;
+        const { title, author, bookCover, description, pages, price } =
+            bookModalFormState.values;
 
-        const data = {
-            title: bookModalFormValues.title,
-            author: bookModalFormValues.author,
-            bookCover: bookModalFormValues.bookCover,
-            description: bookModalFormValues.description,
-            pages: bookModalFormValues.pages,
-            price: bookModalFormValues.price,
-        };
+        const data = new BookModalData(
+            title,
+            author,
+            bookCover,
+            description,
+            pages,
+            price
+        );
 
         try {
-            const response = await fetch("http://localhost:3000/books/new", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: authContextValue.assignAccessState.token,
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (response.status !== 201) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
-            const bookData = responseObj.data.book;
+            const response = await addNewBook(data, authContextValue);
+            const message = response.message;
+            const { bookData } = response.data;
 
             bookContextValue.dispatchBook(BookActions.createBook(bookData));
 
@@ -213,60 +231,35 @@ const BookModalForm = (props) => {
             !bookModalFormState.validities.bookCover ||
             !bookModalFormState.validities.description ||
             !bookModalFormState.validities.pages ||
-            !bookModalFormState.validities.price
+            !bookModalFormState.validities.price ||
+            bookModalFormState.values.title === "" ||
+            bookModalFormState.values.author === "" ||
+            bookModalFormState.values.bookCover === "" ||
+            bookModalFormState.values.description === "" ||
+            bookModalFormState.values.pages === "" ||
+            bookModalFormState.values.price === ""
         ) {
             return;
         }
 
-        const bookModalFormValues = bookModalFormState.values;
+        const { title, author, bookCover, description, pages, price } =
+            bookModalFormState.values;
 
-        const data = {
-            title: bookModalFormValues.title
-                ? bookModalFormValues.title
-                : undefined,
-            author: bookModalFormValues.author
-                ? bookModalFormValues.author
-                : undefined,
-            bookCover: bookModalFormValues.bookCover
-                ? bookModalFormValues.bookCover
-                : undefined,
-            description: bookModalFormValues.description
-                ? bookModalFormValues.description
-                : undefined,
-            pages: bookModalFormValues.pages
-                ? bookModalFormValues.pages
-                : undefined,
-            price: bookModalFormValues.price
-                ? bookModalFormValues.price
-                : undefined,
-        };
+        const data = new BookModalData(
+            title ? title : undefined,
+            author ? author : undefined,
+            bookCover ? bookCover : undefined,
+            description ? description : undefined,
+            pages ? pages : undefined,
+            price ? price : undefined
+        );
 
         try {
-            const response = await fetch(
-                `http://localhost:3000/books/${bookID}`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: authContextValue.assignAccessState.token,
-                    },
-                    body: JSON.stringify(data),
-                }
-            );
+            const response = await updateBook(data, authContextValue, bookID);
+            const message = response.message;
+            const { updatedBook } = response.data;
 
-            if (response.status !== 202) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
-            const updatedBookData = responseObj.data.updateBook;
-
-            bookContextValue.dispatchBook(
-                BookActions.updateBook(updatedBookData)
-            );
-
-            console.log(updatedBookData);
+            bookContextValue.dispatchBook(BookActions.updateBook(updatedBook));
 
             alert(message);
             props.hideBookModal();
@@ -279,22 +272,8 @@ const BookModalForm = (props) => {
         event.preventDefault();
 
         try {
-            const response = await fetch(
-                `http://localhost:3000/books/${bookID}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: authContextValue.assignAccessState.token,
-                    },
-                }
-            );
-
-            if (response.status !== 200) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
+            const response = await deleteBook(authContextValue, bookID);
+            const message = response.message;
 
             bookContextValue.dispatchBook(BookActions.deleteBook(bookID));
 

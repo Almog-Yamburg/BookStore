@@ -8,6 +8,8 @@ import {
 } from "../../../actions/assign-access.action.js";
 
 import { AuthContext } from "../../../contexts/Auth.context";
+import { logout } from "../../../services/user.service";
+import { adminLogout } from "../../../services/admin.service";
 
 const Sidebar = (props) => {
     const authContextValue = useContext(AuthContext);
@@ -15,19 +17,8 @@ const Sidebar = (props) => {
 
     const handleLogout = async () => {
         try {
-            const response = await fetch("http://localhost:3000/users/logout", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${authContextValue.assignAccessState.token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
+            const response = await logout(authContextValue);
+            const message = response.message;
             alert(message);
 
             localStorage.removeItem("USER");
@@ -46,22 +37,8 @@ const Sidebar = (props) => {
 
     const handleAdminLogout = async () => {
         try {
-            const response = await fetch(
-                "http://localhost:3000/admins/logout",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: authContextValue.assignAccessState.token,
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error();
-            }
-
-            const responseObj = await response.json();
-            const message = responseObj.message;
+            const response = await adminLogout(authContextValue);
+            const message = response.message;
             alert(message);
 
             localStorage.removeItem("ADMIN");

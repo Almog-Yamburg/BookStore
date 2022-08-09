@@ -31,3 +31,18 @@ export const login = async (data) => {
 
     return responseObj;
 };
+
+export const logout = async (authContextValue) => {
+    const response = await fetch(`${environments.API_URL}/users/logout`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${authContextValue.assignAccessState.token}`,
+        },
+    });
+
+    if (!response.ok) throw new Error();
+
+    const responseObj = response.json();
+
+    return responseObj;
+};
