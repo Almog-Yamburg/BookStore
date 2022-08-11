@@ -6,8 +6,8 @@ import { BookContext } from "../../../contexts/Book.context";
 import { BookModalData } from "../../../models/book-modal.model";
 import {
     addNewBook,
-    updateBook,
-    deleteBook,
+    updateBookData,
+    deleteOneBook,
 } from "../../../services/book.service";
 
 import bookModalFormReducer, {
@@ -15,7 +15,11 @@ import bookModalFormReducer, {
 } from "../../../reducers/book-modal-form.reducer.js";
 import * as BookModalFormActions from "../../../actions/book-modal-form.action.js";
 
-import * as BookActions from "../../../actions/book-action.js";
+import {
+    createBook,
+    updateBook,
+    deleteBook,
+} from "../../../actions/book-action.js";
 
 import FormInputContainer from "../../form/form-input-container/FormInputContainer.component";
 
@@ -39,7 +43,7 @@ const BookModalForm = (props) => {
                     titleInput,
                     false,
                     "Please enter book title",
-                    "titleInput"
+                    "title"
                 )
             );
 
@@ -47,12 +51,7 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updateAction(
-                titleInput,
-                true,
-                "",
-                "titleInput"
-            )
+            BookModalFormActions.updateAction(titleInput, true, "", "title")
         );
     };
 
@@ -65,7 +64,7 @@ const BookModalForm = (props) => {
                     authorInput,
                     false,
                     "Please enter author name",
-                    "authorName"
+                    "author"
                 )
             );
 
@@ -73,12 +72,7 @@ const BookModalForm = (props) => {
         }
 
         dispatchBookModalFormState(
-            BookModalFormActions.updateAction(
-                authorInput,
-                true,
-                "",
-                "authorName"
-            )
+            BookModalFormActions.updateAction(authorInput, true, "", "author")
         );
     };
 
@@ -211,9 +205,9 @@ const BookModalForm = (props) => {
         try {
             const response = await addNewBook(data, authContextValue);
             const message = response.message;
-            const { bookData } = response.data;
+            const { book } = response.data;
 
-            bookContextValue.dispatchBook(BookActions.createBook(bookData));
+            bookContextValue.dispatchBook(createBook(book));
 
             alert(message);
             props.hideBookModal();
@@ -231,13 +225,7 @@ const BookModalForm = (props) => {
             !bookModalFormState.validities.bookCover ||
             !bookModalFormState.validities.description ||
             !bookModalFormState.validities.pages ||
-            !bookModalFormState.validities.price ||
-            bookModalFormState.values.title === "" ||
-            bookModalFormState.values.author === "" ||
-            bookModalFormState.values.bookCover === "" ||
-            bookModalFormState.values.description === "" ||
-            bookModalFormState.values.pages === "" ||
-            bookModalFormState.values.price === ""
+            !bookModalFormState.validities.price
         ) {
             return;
         }
@@ -255,11 +243,15 @@ const BookModalForm = (props) => {
         );
 
         try {
-            const response = await updateBook(data, authContextValue, bookID);
+            const response = await updateBookData(
+                data,
+                authContextValue,
+                bookID
+            );
             const message = response.message;
             const { updatedBook } = response.data;
 
-            bookContextValue.dispatchBook(BookActions.updateBook(updatedBook));
+            bookContextValue.dispatchBook(updateBook(updatedBook));
 
             alert(message);
             props.hideBookModal();
@@ -272,10 +264,10 @@ const BookModalForm = (props) => {
         event.preventDefault();
 
         try {
-            const response = await deleteBook(authContextValue, bookID);
+            const response = await deleteOneBook(authContextValue, bookID);
             const message = response.message;
 
-            bookContextValue.dispatchBook(BookActions.deleteBook(bookID));
+            bookContextValue.dispatchBook(deleteBook(bookID));
 
             alert(message);
             props.hideBookModal();

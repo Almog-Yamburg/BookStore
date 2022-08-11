@@ -3,7 +3,7 @@ import environments from "../environments/environments";
 export const getAllBooks = async () => {
     const response = await fetch(`${environments.API_URL}/books`);
 
-    if (!response) throw new Error();
+    if (!response.ok) throw new Error();
 
     const responseObj = await response.json();
 
@@ -30,14 +30,14 @@ export const addNewBook = async (data, authContextValue) => {
         body: JSON.stringify(data),
     });
 
-    if (!response.status !== 201) throw new Error();
+    if (response.status !== 201) throw new Error();
 
     const responseObj = response.json();
 
     return responseObj;
 };
 
-export const updateBook = async (data, authContextValue, bookID) => {
+export const updateBookData = async (data, authContextValue, bookID) => {
     const response = await fetch(`${environments.API_URL}/books/${bookID}`, {
         method: "PATCH",
         headers: {
@@ -47,14 +47,14 @@ export const updateBook = async (data, authContextValue, bookID) => {
         body: JSON.stringify(data),
     });
 
-    if (!response.status !== 202) throw new Error();
+    if (response.status !== 202) throw new Error();
 
     const responseObj = response.json();
 
     return responseObj;
 };
 
-export const deleteBook = async (authContextValue, bookID) => {
+export const deleteOneBook = async (authContextValue, bookID) => {
     const response = await fetch(`${environments.API_URL}/books/${bookID}`, {
         method: "DELETE",
         headers: {

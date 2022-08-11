@@ -12,6 +12,8 @@ export const updateAction = (value, isValid, message, field) => {
             field,
         },
     };
+
+    return action;
 };
 
 export default bookModalActionTypes;

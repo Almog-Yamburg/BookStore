@@ -12,7 +12,7 @@ const bookReducer = (state, action) => {
             return updatedState;
         }
         case bookActionTypes.CREATE_BOOK: {
-            const bookData = action.payload.bookData;
+            const { bookData } = action.payload;
             const bookState = JSON.parse(JSON.stringify(state));
 
             bookState.push(bookData);
@@ -20,7 +20,7 @@ const bookReducer = (state, action) => {
             return bookState;
         }
         case bookActionTypes.UPDATE_BOOK: {
-            const updatedBookData = action.payload.updatedBookData;
+            const { updatedBookData } = action.payload;
 
             const bookState = JSON.parse(JSON.stringify(state));
 
@@ -29,6 +29,7 @@ const bookReducer = (state, action) => {
             );
 
             bookState[foundIndex] = updatedBookData;
+
             return bookState;
         }
         case bookActionTypes.DELETE_BOOK: {

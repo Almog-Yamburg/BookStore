@@ -30,7 +30,7 @@ const loginReducer = (state, action) => {
             };
             const updatedErrorMessages = {
                 ...state.errorMessages,
-                [field]: action.payload.errorMessage,
+                [field]: action.payload.message,
             };
 
             const updatedState = {

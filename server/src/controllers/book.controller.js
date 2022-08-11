@@ -81,7 +81,7 @@ export const updateBook = async (req, res) => {
                 202,
                 "Accepted",
                 "Book was updated successfully",
-                { updateBook }
+                { updatedBook }
             )
         );
     } catch (error) {
