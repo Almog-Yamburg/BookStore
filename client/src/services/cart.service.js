@@ -9,7 +9,7 @@ export const getUserCart = async (authContextValue) => {
 
     if (!response.ok) throw new Error();
 
-    const responseObj = response.json();
+    const responseObj = await response.json();
 
     return responseObj;
 };
@@ -43,7 +43,7 @@ export const updateQuantity = async (data, authContextValue) => {
 
     if (!response.ok) throw new Error();
 
-    const responseObj = response.json();
+    const responseObj = await response.json();
 
     return responseObj;
 };
@@ -57,7 +57,7 @@ export const checkout = async (authContextValue) => {
 
     if (!response.ok) throw new Error();
 
-    const responseObj = response.json();
+    const responseObj = await response.json();
 
     return responseObj;
 };
@@ -76,4 +76,8 @@ export const removeFromCart = async (data, authContextValue) => {
     );
 
     if (!response.ok) throw new Error();
+
+    const responseObj = await response.json();
+
+    return responseObj;
 };

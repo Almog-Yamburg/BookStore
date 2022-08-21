@@ -19,7 +19,7 @@ const cartReducer = (state, action) => {
 
             const updatedState = {
                 items: cartItems,
-                price: price,
+                price: price.toFixed(2),
             };
 
             return updatedState;
@@ -49,8 +49,9 @@ const cartReducer = (state, action) => {
         }
 
         case cartActionTypes.INCREMENT: {
-            const itemID = action.payload.itemID;
-            let price = 0;
+            const { itemID, bookPrice, cart } = action.payload;
+
+            let price = +cart.price;
 
             const itemsState = JSON.parse(JSON.stringify(state.items));
 
@@ -60,20 +61,18 @@ const cartReducer = (state, action) => {
 
             itemsState[itemIndex].quantity++;
 
-            price +=
-                itemsState[itemIndex].bookID.price *
-                itemsState[itemIndex].quantity;
+            price += bookPrice;
 
             const updatedState = {
                 items: itemsState,
-                price: price,
+                price: price.toFixed(2),
             };
 
             return updatedState;
         }
         case cartActionTypes.DECREMENT: {
-            const itemID = action.payload.itemID;
-            let price = 0;
+            const { itemID, bookPrice, cart } = action.payload;
+            let price = cart.price;
 
             const itemsState = JSON.parse(JSON.stringify(state.items));
 
@@ -82,13 +81,11 @@ const cartReducer = (state, action) => {
             );
             itemsState[itemIndex].quantity--;
 
-            price -=
-                itemsState[itemIndex].bookID.price *
-                -itemsState[itemIndex].quantity;
+            price -= bookPrice;
 
             const updatedState = {
                 items: itemsState,
-                price: price,
+                price: price.toFixed(2),
             };
 
             return updatedState;

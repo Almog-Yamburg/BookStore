@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import "./cart-item.styles.css";
 
 import { AuthContext } from "../../../../contexts/Auth.context";
@@ -19,8 +19,10 @@ const CartItem = (props) => {
     const authContextValue = useContext(AuthContext);
     const cartContextValue = useContext(CartContext);
 
+    const cart = cartContextValue.cart;
+
     const handleRemoveFromCart = async () => {
-        const data = cartData(props.id);
+        const data = new cartData(props.id);
 
         try {
             await removeFromCart(data, authContextValue);
@@ -34,24 +36,33 @@ const CartItem = (props) => {
     };
 
     const handleIncrement = async () => {
+        if (props.quantity >= 10) {
+            alert("Cant add more then 10 copies!");
+            return;
+        }
         const data = new cartData(props.id, props.quantity);
 
         try {
             await updateQuantity(data, authContextValue);
 
-            cartContextValue.dispatchCart(increment(props.id));
+            cartContextValue.dispatchCart(
+                increment(props.id, props.price, cart)
+            );
         } catch (error) {
             alert("Something went wrong!");
         }
     };
 
     const handleDecrement = async () => {
+        if (props.quantity <= 1) return;
         const data = new cartData(props.id, props.quantity);
 
         try {
             await updateQuantity(data, authContextValue);
 
-            cartContextValue.dispatchCart(decrement(props.id));
+            cartContextValue.dispatchCart(
+                decrement(props.id, props.price, cart)
+            );
         } catch (error) {
             alert("Something went wrong!");
         }

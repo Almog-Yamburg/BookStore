@@ -1,6 +1,6 @@
 export class cartData {
-    constructor(cartID, quantity) {
-        this.cartID = cartID;
+    constructor(itemID, quantity) {
+        this.itemID = itemID;
         this.quantity = quantity;
     }
 }

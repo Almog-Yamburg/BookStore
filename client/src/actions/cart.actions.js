@@ -38,22 +38,26 @@ export const checkoutCartAction = () => {
     return action;
 };
 
-export const increment = (itemID) => {
+export const increment = (itemID, bookPrice, cart) => {
     const action = {
         type: cartActionTypes.INCREMENT,
         payload: {
             itemID: itemID,
+            bookPrice: bookPrice,
+            cart: cart,
         },
     };
 
     return action;
 };
 
-export const decrement = (itemID) => {
+export const decrement = (itemID, bookPrice, cart) => {
     const action = {
         type: cartActionTypes.DECREMENT,
         payload: {
             itemID: itemID,
+            bookPrice: bookPrice,
+            cart: cart,
         },
     };
 

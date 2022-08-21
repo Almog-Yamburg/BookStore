@@ -1,12 +1,12 @@
 import Cart from "../models/cart.model.js";
 import { SuccessResponse } from "../models/response.model.js";
 
-export const getCart = async (req, res) => {
+export const getCart = async (req, res, next) => {
     const user = req.user;
 
     try {
         const cart = await Cart.findOne({
-            owner: user._id,
+            ownerID: user._id,
         });
 
         if (!cart) throw new Error();
@@ -23,10 +23,9 @@ export const getCart = async (req, res) => {
     }
 };
 
-export const addBookToCart = async (req, res) => {
+export const addBookToCart = async (req, res, next) => {
     const user = req.user;
-    const bookID = req.body.bookID;
-    const quantity = req.body.quantity;
+    const { bookID, quantity } = req.body;
 
     if (!bookID) {
         return res.status(400).send({
@@ -46,7 +45,7 @@ export const addBookToCart = async (req, res) => {
 
     try {
         const cart = await Cart.findOne({
-            owner: user._id,
+            ownerID: user._id,
         });
         if (!cart) {
             throw new Error();
@@ -58,6 +57,8 @@ export const addBookToCart = async (req, res) => {
                 bookID: bookID,
                 quantity: quantity,
             });
+
+            await cart.populate("books.bookID");
         } else {
             books.map((bookDoc) => {
                 if (bookDoc.bookID.toString() === bookID)
@@ -79,9 +80,9 @@ export const addBookToCart = async (req, res) => {
     }
 };
 
-export const updateQuantity = async (req, res) => {
+export const updateQuantity = async (req, res, next) => {
     const user = req.user;
-    const bookID = req.body.bookID;
+    const bookID = req.body.itemID;
     const quantity = req.body.quantity;
 
     if (!bookID)
@@ -91,7 +92,7 @@ export const updateQuantity = async (req, res) => {
             message: "",
         });
 
-    if (quantity < 1 || quantity > 10)
+    if (!quantity)
         return res.status(400).send({
             status: 400,
             statusText: "Bad Request",
@@ -100,27 +101,18 @@ export const updateQuantity = async (req, res) => {
 
     try {
         const cart = await Cart.findOne({
-            owner: user._id,
+            ownerID: user._id,
         });
         if (!cart) {
             throw new Error();
         }
 
-        if (
-            !cart.books.find((bookDoc) => bookDoc.bookID.toString() === bookID)
-        ) {
-            return res.status(400).send({
-                status: 400,
-                statusText: "Bad Request",
-                message: "",
-            });
-        } else {
-            cart.books.map((bookDoc) => {
-                if (bookDoc.bookID.toString() === bookID) {
-                    bookDoc.quantity = quantity;
-                }
-            });
-        }
+        const book = cart.books.find(
+            (bookDoc) => bookDoc.bookID.toString() === bookID
+        );
+        if (!book) throw new Error();
+
+        book.quantity = quantity;
 
         await cart.save();
 
@@ -130,16 +122,17 @@ export const updateQuantity = async (req, res) => {
             })
         );
     } catch (error) {
+        console.log(error);
         error.status = 500;
         error.statusText = "Internal Server Error";
         next(error);
     }
 };
 
-export const removeFromCart = async (req, res) => {
+export const removeFromCart = async (req, res, next) => {
     const user = req.user;
+    const bookID = req.body.itemID;
 
-    const bookID = req.body.bookID;
     if (!bookID) {
         return res.status(400).send({
             status: 400,
@@ -150,15 +143,16 @@ export const removeFromCart = async (req, res) => {
 
     try {
         const cart = await Cart.findOne({
-            owner: user._id,
+            ownerID: user._id,
         });
         if (!cart) {
             throw new Error();
         }
 
-        if (
-            !cart.books.find((bookDoc) => bookDoc.bookID.toString() === bookID)
-        ) {
+        const bookObj = cart.books.find(
+            (book) => book.bookID.toString() === bookID
+        );
+        if (!bookObj) {
             return res.status(400).send({
                 status: 400,
                 statusText: "Bad Request",
@@ -167,8 +161,10 @@ export const removeFromCart = async (req, res) => {
         }
 
         cart.books = cart.books.filter(
-            (bookDoc) => bookDoc.bookID.toString() !== bookID
+            (bookDoc) => bookDoc._id !== bookObj._id
         );
+
+        await cart.populate("books.bookID");
 
         await cart.save();
 
@@ -178,20 +174,21 @@ export const removeFromCart = async (req, res) => {
             })
         );
     } catch (error) {
+        console.log(error);
         error.status = 500;
         error.statusText = "Internal Server Error";
         next(error);
     }
 };
 
-export const checkout = async (req, res) => {
+export const checkout = async (req, res, next) => {
     const user = req.user;
 
     try {
         if (!user) throw new Error();
 
         const cart = await Cart.findOne({
-            owner: user._id,
+            ownerID: user._id,
         });
 
         if (cart.books.length === 0) {

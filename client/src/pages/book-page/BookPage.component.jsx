@@ -3,9 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./book-page.styles.css";
 
 import { AuthContext } from "../../contexts/Auth.context";
+import { CartContext } from "../../contexts/Cart.context";
 import { getOneBook } from "../../services/book.service";
+
 import { LOADER_TIMEOUT } from "../../constants/constants";
-import { addToCart } from "../../services/cart.service";
+import { addToCart, updateQuantity } from "../../services/cart.service";
 
 import Loader from "../../components/shared/loader/Loader.component";
 import { BookPageData } from "../../models/book-page.model";
@@ -19,6 +21,8 @@ const BookPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [book, setBook] = useState(null);
     const [quantity, setQuantity] = useState(1);
+
+    const bookID = params.bookID;
 
     const handleIncrement = () => {
         if (quantity < 10) setQuantity(quantity + 1);
@@ -47,8 +51,6 @@ const BookPage = () => {
     };
 
     useEffect(() => {
-        const bookID = params.bookID;
-
         const getBook = async () => {
             try {
                 const response = await getOneBook(bookID);
