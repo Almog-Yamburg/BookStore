@@ -72,7 +72,7 @@ const cartReducer = (state, action) => {
         }
         case cartActionTypes.DECREMENT: {
             const { itemID, bookPrice, cart } = action.payload;
-            let price = cart.price;
+            let price = +cart.price;
 
             const itemsState = JSON.parse(JSON.stringify(state.items));
 
