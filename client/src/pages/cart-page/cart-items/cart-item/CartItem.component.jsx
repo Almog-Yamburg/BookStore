@@ -40,7 +40,7 @@ const CartItem = (props) => {
             alert("Cant add more then 10 copies!");
             return;
         }
-        const data = new cartData(props.id, props.quantity);
+        const data = new cartData(props.id, props.quantity + 1);
 
         try {
             await updateQuantity(data, authContextValue);
@@ -55,7 +55,7 @@ const CartItem = (props) => {
 
     const handleDecrement = async () => {
         if (props.quantity <= 1) return;
-        const data = new cartData(props.id, props.quantity);
+        const data = new cartData(props.id, props.quantity - 1);
 
         try {
             await updateQuantity(data, authContextValue);
